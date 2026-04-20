@@ -1,0 +1,184 @@
+/* =========================================
+   1. 基础容器
+   ========================================= */
+.auth-container {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%);
+    backdrop-filter: blur(2px);
+
+    z-index: 9999; display: flex; justify-content: center; align-items: center;
+    transition: all 0.6s ease;
+}
+.auth-container.unlocked { opacity: 0; pointer-events: none; transform: scale(1.05); }
+
+.auth-box {
+    width: 420px; padding: 40px; 
+    /* 恢复全边框 */
+    border: 1px solid var(--holo-cyan);
+    background: rgba(12, 20, 25, 0.95); 
+    box-shadow: 0 0 40px rgba(0, 243, 234, 0.15);
+    clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+    position: relative;
+    z-index: 10;
+}
+.auth-box::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+    background: var(--holo-cyan); box-shadow: 0 0 10px var(--holo-cyan);
+}
+
+/* =========================================
+   2. [保留] 故障文字特效 (Glitch Text)
+   ========================================= */
+.auth-header { margin-bottom: 25px; text-align: center; }
+
+.auth-title { 
+    font-family: 'Orbitron', sans-serif; font-size: 20px; color: #fff; 
+    letter-spacing: 3px; text-align: center; margin-bottom: 5px;
+    position: relative; display: inline-block;
+}
+
+/* 故障动画核心代码 */
+.glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(12, 20, 25, 0.95); /* 与背景同色以遮盖 */
+}
+.glitch::before {
+    left: 2px; text-shadow: -1px 0 #ff00c1; clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-1 5s infinite linear alternate-reverse;
+}
+.glitch::after {
+    left: -2px; text-shadow: -1px 0 #00fff9; clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-2 5s infinite linear alternate-reverse;
+}
+
+/* 故障动画帧 */
+@keyframes glitch-anim-1 {
+    0% { clip: rect(20px, 9999px, 10px, 0); }
+    20% { clip: rect(60px, 9999px, 70px, 0); }
+    40% { clip: rect(10px, 9999px, 50px, 0); }
+    60% { clip: rect(80px, 9999px, 90px, 0); }
+    80% { clip: rect(30px, 9999px, 10px, 0); }
+    100% { clip: rect(50px, 9999px, 30px, 0); }
+}
+@keyframes glitch-anim-2 {
+    0% { clip: rect(10px, 9999px, 80px, 0); }
+    20% { clip: rect(70px, 9999px, 10px, 0); }
+    40% { clip: rect(20px, 9999px, 50px, 0); }
+    60% { clip: rect(90px, 9999px, 20px, 0); }
+    80% { clip: rect(10px, 9999px, 40px, 0); }
+    100% { clip: rect(60px, 9999px, 30px, 0); }
+}
+
+.auth-subtitle { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--holo-cyan); text-align: center; opacity: 0.7; letter-spacing: 1px; }
+
+/* =========================================
+   3. [保留] 输入框交互光效 (Input Highlight)
+   ========================================= */
+.input-group { margin-bottom: 15px; }
+.input-group label { display: block; font-family: 'Share Tech Mono'; font-size: 10px; color: rgba(255,255,255,0.6); margin-bottom: 5px; }
+
+/* 包装器用于定位高亮条 */
+.input-wrapper { position: relative; width: 100%; }
+
+.holo-input {
+    width: 100%; background: rgba(0,0,0,0.5); 
+    border: 1px solid rgba(255,255,255,0.1); border-left: 2px solid var(--holo-cyan);
+    color: #fff; padding: 10px; font-family: 'Share Tech Mono', monospace; font-size: 12px; 
+    transition: 0.3s;
+}
+.holo-input:focus { 
+    background: rgba(0, 243, 234, 0.05); 
+    border-color: rgba(255,255,255,0.3); /* 聚焦时边框微亮 */
+}
+
+/* 底部展开的高亮条 */
+.input-highlight {
+    position: absolute; bottom: 0; left: 50%; width: 0; height: 2px;
+    background: var(--holo-cyan); transition: 0.4s ease; transform: translateX(-50%);
+    box-shadow: 0 0 10px var(--holo-cyan);
+    pointer-events: none;
+}
+.holo-input:focus + .input-highlight { width: 100%; }
+
+/* =========================================
+   4. 单轨道三卫星 (One Ring, Three Dots)
+   ========================================= */
+.hud-layer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+}
+
+/* 轨道本身 */
+.center-ring {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 650px; height: 650px; 
+    border: 1px dashed rgba(0, 243, 234, 0.2); 
+    border-radius: 50%;
+    animation: ring-spin 20s linear infinite;
+    
+    /* 关键：确保内部的小球相对于这个圆环定位 */
+    display: flex; justify-content: center; align-items: center;
+}
+
+/* --- 小球通用样式 --- */
+.sat-point {
+    position: absolute;
+    width: 12px; height: 12px;
+    background: var(--holo-cyan); 
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--holo-cyan);
+    
+    /* 核心逻辑：先在圆心，通过 transform 推到圆环边缘 
+       原理：圆环宽650px，半径就是325px。
+       translateY(-325px) 会把球向上推到边缘。
+    */
+}
+
+/* --- 分别设置三个球的角度 (360度 / 3 = 120度) --- */
+
+/* 第1个球：0度 (正上方) */
+.sat-point.p1 {
+    transform: rotate(0deg) translateY(-325px);
+}
+
+/* 第2个球：120度 (右下方) */
+.sat-point.p2 {
+    transform: rotate(180deg) translateY(-325px);
+}
+
+/* 第3个球：240度 (左下方) */
+
+/* 旋转动画 (保持不变) */
+@keyframes ring-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* =========================================
+   5. 通用按钮与动画
+   ========================================= */
+.auth-main-btn { margin-top: 10px; }
+
+.auth-view { animation: fadeIn 0.4s ease-out; }
+.auth-view.hidden { display: none; }
+.auth-footer-action { margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #888; }
+.auth-status { text-align: center; margin-top: 15px; height: 20px; font-family: 'Share Tech Mono'; font-size: 11px; color: rgba(255,255,255,0.3); }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+
+
+/* login.css - 新增粒子特效样式 */
+
+#constellation-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* 比 hud-layer (0) 高，比 auth-box (10) 低 */
+    pointer-events: none; /* 让鼠标事件穿透画布，不影响点击 */
+}

@@ -1,0 +1,380 @@
+/* 主程序与通用样式 */
+:root {
+    --holo-cyan: #00f3ea;       
+    --holo-red: #ff5050;
+    --holo-purple: #d000ff;
+    --holo-glass: rgba(10, 15, 20, 0.7);
+    
+    --glow-text: 0 0 5px rgba(0, 243, 234, 0.4);
+    --panel-shadow: inset 0 0 30px rgba(0, 243, 234, 0.05);
+    
+    --panel-width: 300px;
+    --trigger-width: 30px; 
+    --anim-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { box-sizing: border-box; outline: none; margin: 0; padding: 0; user-select: none; }
+
+body {
+    width: 100vw; height: 100vh; overflow: hidden;
+    background: #000; 
+    font-family: 'Rajdhani', sans-serif; 
+    color: #d0f0f0;
+}
+
+/* =========================================
+   环境特效 (Background Effects)
+   ========================================= */
+body::after {
+    content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none;
+}
+body::before {
+    content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    box-shadow: inset 0 0 150px rgba(0,0,0,0.9); z-index: 100; pointer-events: none;
+}
+
+#cesiumContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+
+/* =========================================
+   HUD Header
+   ========================================= */
+.hud-header {
+    position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+    z-index: 10; display: flex; align-items: center; gap: 20px; opacity: 0.9;
+}
+.header-text {
+    font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 6px;
+    color: var(--holo-cyan); text-shadow: var(--glow-text); position: relative;
+}
+.header-text::after {
+    content: ' '; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+    font-family: 'Share Tech Mono', monospace; font-size: 8px; color: rgba(255,255,255,0.4); letter-spacing: 1px; width: 200%; text-align: center;
+}
+.header-line { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, var(--holo-cyan), transparent); opacity: 0.6; }
+
+/* =========================================
+   侧边栏容器 (Sidebar Containers)
+   ========================================= */
+.sidebar-container {
+    position: fixed; top: 110px; bottom: 130px; 
+    width: calc(var(--panel-width) + var(--trigger-width)); 
+    z-index: 20; pointer-events: none; 
+}
+
+.side-trigger {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: var(--trigger-width); height: 60px;
+    cursor: pointer; pointer-events: auto; z-index: 30;
+    display: flex; align-items: center; justify-content: center;
+    transition: 0.3s;
+}
+.arrow-box {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0.6; transition: 0.3s;
+}
+.side-trigger:hover .arrow-box { opacity: 1; text-shadow: var(--glow-text); }
+.arrow-icon {
+    width: 10px; height: 10px;
+    border-top: 2px solid var(--holo-cyan);
+    border-right: 2px solid var(--holo-cyan);
+    transition: transform 0.5s var(--anim-ease);
+    box-shadow: 2px -2px 5px rgba(0, 243, 234, 0.3);
+}
+
+.geo-panel {
+    position: absolute; top: 0; bottom: 0; width: var(--panel-width);
+    pointer-events: auto;
+    background: var(--holo-glass);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--panel-shadow); 
+    border: 1px solid rgba(0, 243, 234, 0.1);
+    border-top: 2px solid rgba(0, 243, 234, 0.6);
+    transition: transform 0.6s var(--anim-ease);
+    padding: 30px 25px; overflow-y: auto;
+}
+
+/* 左侧栏特定逻辑 */
+#leftSidebar { left: 0; }
+#leftSidebar .side-trigger { left: 0; border-right: 1px solid rgba(0,243,234,0.3); } 
+#leftSidebar .geo-panel { left: var(--trigger-width); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%); }
+#leftSidebar .arrow-icon { transform: rotate(-135deg); } 
+#leftSidebar.closed .geo-panel { transform: translateX(-110%); } 
+#leftSidebar.closed .arrow-icon { transform: rotate(45deg); }
+
+/* 右侧栏特定逻辑 */
+#rightSidebar { right: 0; }
+#rightSidebar .side-trigger { right: 0; border-left: 1px solid rgba(0,243,234,0.3); }
+#rightSidebar .geo-panel { right: var(--trigger-width); clip-path: polygon(0 0, 100% 0, 100% 100%, 30px 100%, 0 calc(100% - 30px)); }
+#rightSidebar .arrow-icon { transform: rotate(45deg); } 
+#rightSidebar.closed .geo-panel { transform: translateX(110%); } 
+#rightSidebar.closed .arrow-icon { transform: rotate(-135deg); }
+
+.deco-corner { position: absolute; width: 10px; height: 10px; border: 2px solid var(--holo-cyan); opacity: 0.5; pointer-events: none; }
+.top-right { top: 10px; right: 10px; border-bottom: none; border-left: none; }
+.bottom-left { bottom: 35px; left: 10px; border-top: none; border-right: none; }
+
+/* =========================================
+   底部抽屉 (Bottom Drawer)
+   ========================================= */
+.bottom-drawer-container {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 640px; z-index: 30; transition: transform 0.6s var(--anim-ease);
+}
+.bottom-drawer-container.closed { transform: translateX(-50%) translateY(95px); }
+.drawer-handle {
+    width: 140px; height: 24px; margin: 0 auto;
+    background: linear-gradient(180deg, rgba(0,243,234,0.1), rgba(0,0,0,0.8));
+    border-top: 1px solid var(--holo-cyan); cursor: pointer; 
+    clip-path: polygon(15px 0, calc(100% - 15px) 0, 100% 100%, 0 100%);
+    display: flex; justify-content: center; align-items: center;
+}
+.handle-line { width: 40px; height: 2px; background: var(--holo-cyan); box-shadow: var(--glow-text); }
+.drawer-content {
+    height: 90px; background: var(--holo-glass); backdrop-filter: blur(15px);
+    border: 1px solid rgba(0, 243, 234, 0.1); border-bottom: none;
+    clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%);
+    padding: 0 40px; display: flex; align-items: center; justify-content: space-between;
+}
+
+/* =========================================
+   基础 UI 组件 (登录页也会用到这些！)
+   ========================================= */
+.panel-label { 
+    font-family: 'Share Tech Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); 
+    margin-bottom: 5px; display: block; border-left: 2px solid var(--holo-cyan); padding-left: 8px; 
+}
+.panel-label.inline { border: none; margin: 0; padding: 0; cursor: pointer; }
+
+.panel-title { 
+    font-family: 'Orbitron'; font-size: 14px; color: #fff; letter-spacing: 2px; 
+    margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; 
+}
+.panel-title::after { content:''; flex: 1; height: 2px; background: rgba(255,255,255,0.1); }
+
+/* 按钮基础样式 */
+.holo-btn {
+    width: 100%; padding: 10px 15px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 243, 234, 0.3); color: var(--holo-cyan);
+    font-family: 'Rajdhani'; font-weight: 700; letter-spacing: 2px; font-size: 14px; cursor: pointer; transition: 0.2s; margin-bottom: 12px;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    text-align: left; position: relative; overflow: hidden;
+}
+.holo-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0,243,234,0.2), transparent); transition: 0.4s; }
+.holo-btn:hover { background: rgba(0, 243, 234, 0.1); border-color: var(--holo-cyan); color: #fff; text-shadow: var(--glow-text); }
+.holo-btn:hover::before { left: 100%; }
+
+/* 按钮变体 */
+.holo-btn.btn-highlight { border-color: var(--holo-cyan); }
+.holo-btn.btn-ghost { background: rgba(0, 243, 234, 0.05); }
+.holo-btn.btn-danger { border-color: rgba(255,80,80,0.4); color: #ff8080; }
+.holo-btn.btn-danger:hover { background: rgba(255, 80, 80, 0.1); border-color: var(--holo-red); color: #fff; text-shadow: 0 0 5px rgba(255,80,80,0.6); }
+
+/* 输入框 */
+.holo-input {
+    width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-left: 2px solid var(--holo-cyan);
+    color: #fff; padding: 10px; font-family: 'Share Tech Mono', monospace; font-size: 12px; margin-bottom: 15px; transition: 0.3s;
+}
+.holo-input:focus { background: rgba(0, 243, 234, 0.05); border-color: rgba(0, 243, 234, 0.5); }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(0,243,234,0.3); border-radius: 2px; }
+
+/* 无边框按钮 */
+.frameless-btn {
+    background: transparent; border: none; color: var(--holo-cyan);
+    font-family: 'Share Tech Mono', monospace; font-size: 12px; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; padding: 5px;
+    text-shadow: 0 0 2px rgba(0, 243, 234, 0.3);
+}
+.frameless-btn:hover { color: #fff; text-shadow: var(--glow-text); text-decoration: underline; }
+
+/* =========================================
+   详情面板 (Details & Charts)
+   ========================================= */
+.detail-panel {
+    position: absolute; bottom: 90px; left: 0; width: 100%; height: 0;
+    background: rgba(10, 15, 20, 0.95); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--holo-cyan); overflow: hidden;
+    transition: height 0.4s var(--anim-ease); z-index: 5;
+    padding: 0 20px; display: flex; flex-direction: column;
+}
+.detail-panel.active { height: 250px; padding-top: 15px; border-bottom: 1px solid rgba(0, 243, 234, 0.3); }
+.detail-panel.active.expanded { height: 500px; }
+
+.detail-header {
+    font-family: 'Orbitron', sans-serif; font-size: 14px; color: #fff; letter-spacing: 2px;
+    display: flex; justify-content: center; align-items: center; position: relative;
+    margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0;
+}
+.detail-header .close-btn {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    cursor: pointer; color: var(--holo-red); font-family: 'Share Tech Mono', monospace; font-size: 12px; transition: 0.3s;
+}
+.detail-header .close-btn:hover { text-shadow: 0 0 8px rgba(255, 80, 80, 0.6); color: #ff8080; }
+
+.radar-icon {
+    width: 48px; height: 48px; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    border: 1px solid rgba(0, 243, 234, 0.5); border-radius: 50%; box-shadow: 0 0 8px rgba(0, 243, 234, 0.3); background: rgba(0, 20, 30, 0.3);
+}
+.radar-icon::after {
+    content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 4px; height: 4px; background: var(--holo-cyan); border-radius: 50%; box-shadow: 0 0 4px #fff; z-index: 2;
+}
+.radar-icon::before {
+    content: ''; position: absolute; top: 3px; left: 3px; right: 3px; bottom: 3px;
+    border-radius: 50%; background: conic-gradient(from 0deg, transparent 50%, var(--holo-cyan));
+    opacity: 0.6; animation: radar-spin 1.5s linear infinite;
+}
+@keyframes radar-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* 表格组件 */
+.table-wrapper { flex: 1; overflow-y: auto; margin-bottom: 10px; }
+.holo-table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #ddd; }
+.holo-table th {
+    text-align: left; padding: 5px; color: var(--holo-cyan);
+    border-bottom: 1px solid rgba(0, 243, 234, 0.3);
+    position: sticky; top: 0; background: rgba(10, 15, 20, 0.9);
+}
+.holo-table th.col-time { width: 140px; }
+.holo-table td { padding: 4px 5px; border-bottom: 1px dashed rgba(255, 255, 255, 0.1); }
+.holo-table tr:hover { background: rgba(0, 243, 234, 0.05); }
+
+/* Slider 组件 */
+.holo-slider {
+    -webkit-appearance: none; display: block; width: 100%; height: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    background-image: linear-gradient(var(--holo-cyan), var(--holo-cyan));
+    background-size: 0% 100%; background-repeat: no-repeat;
+    border-radius: 2px; outline: none; padding: 0; margin: 10px 0 20px 0; border: none; cursor: pointer;
+}
+.holo-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 12px; height: 12px;
+    background: var(--holo-cyan); border-radius: 50%; box-shadow: 0 0 10px var(--holo-cyan); transition: transform 0.1s;
+}
+.holo-slider:active::-webkit-slider-thumb { transform: scale(1.3); box-shadow: 0 0 15px var(--holo-cyan); }
+
+/* =========================================
+   遥测组件 (Telemetry)
+   ========================================= */
+.telemetry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.tele-box {
+    background: rgba(0, 243, 234, 0.05); border: 1px solid rgba(0, 243, 234, 0.2); padding: 10px;
+    display: flex; flex-direction: column; justify-content: center; position: relative;
+}
+.tele-box::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 6px; border-top: 2px solid var(--holo-cyan); border-left: 2px solid var(--holo-cyan);
+}
+.tele-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: rgba(255, 255, 255, 0.5); margin-bottom: 2px; }
+.tele-value { font-family: 'Orbitron', sans-serif; font-size: 16px; color: #fff; letter-spacing: 1px; text-shadow: 0 0 5px rgba(0, 243, 234, 0.5); }
+.tele-unit { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--holo-cyan); text-align: right; margin-top: -5px; }
+
+/* =========================================
+   通用工具类 (Utility Classes)
+   ========================================= */
+.flex-col { display: flex; flex-direction: column; }
+.flex-row { display: flex; align-items: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.gap-5 { gap: 5px; }
+.gap-10 { gap: 10px; }
+.align-end { align-items: flex-end; }
+.justify-end { justify-content: flex-end; }
+.w-full { width: 100%; }
+
+.mt-5 { margin-top: 5px; }
+.mt-10 { margin-top: 10px; }
+.mt-20 { margin-top: 20px; }
+.mt-30 { margin-top: 30px; }
+.mt-40 { margin-top: 40px; }
+.mb-25 { margin-bottom: 25px; }
+.mb-15 { margin-bottom: 15px; }
+.m-0 { margin: 0; }
+.p-0 { padding: 0; }
+
+.text-10 { font-size: 10px; }
+.text-12 { font-size: 12px; }
+.text-13 { font-size: 13px; }
+.text-14 { font-size: 14px; }
+.text-dim { color: rgba(255, 255, 255, 0.5); }
+.text-light { color: #ccc; }
+.text-white { color: #fff; }
+.text-right { text-align: right; }
+.text-cyan { color: var(--holo-cyan); }
+.text-danger { color: var(--holo-red); }
+.text-purple { color: var(--holo-purple); text-shadow: 0 0 5px rgba(208, 0, 255, 0.4); }
+.font-mono { font-family: 'Share Tech Mono', monospace; }
+
+.holo-divider {
+    width: 100%; height: 1px; 
+    background: linear-gradient(90deg, transparent, rgba(0,243,234,0.3), transparent);
+}
+.holo-divider.my-25 { margin: 25px 0; }
+.holo-divider.my-15 { margin: 15px 0; }
+
+.chart-wrapper {
+    width: 100%; height: 180px; flex-shrink: 0; margin-bottom: 10px; 
+    border-bottom: 1px dashed rgba(0,243,234,0.3);
+}
+
+.check-cyan { accent-color: var(--holo-cyan); cursor: pointer; }
+.check-white { accent-color: #ffffff; cursor: pointer; }
+.check-danger { accent-color: var(--holo-red); cursor: pointer; }
+.check-purple { accent-color: var(--holo-purple); cursor: pointer; }
+
+.border-none { border: none !important; }
+.opacity-90 { opacity: 0.9; }
+
+
+
+/* =========================================
+   Login Transition Logic (登录进场动画)
+   ========================================= */
+
+/* 1. 给主要的 UI 容器添加统一的过渡动画 */
+.sidebar-container, 
+.bottom-drawer-container, 
+.hud-header {
+    /* 使用你原有的 sci-fi 缓动曲线，让进场更平滑 */
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s ease;
+}
+
+/* 2. 定义 "等待登录" 状态下的样式 (将它们移出屏幕并设为透明) */
+
+/* 顶部 Header：向上平移 */
+body.awaiting-login .hud-header {
+    transform: translate(-50%, -100px) !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 左侧边栏：向左平移 */
+body.awaiting-login #leftSidebar {
+    transform: translateX(-150px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 右侧边栏：向右平移 */
+body.awaiting-login #rightSidebar {
+    transform: translateX(150px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 底部抽屉：向下平移 */
+/* 注意：这里保留 -50% 的 X 轴居中，只改变 Y 轴 */
+body.awaiting-login #bottomDrawer {
+    transform: translate(-50%, 200px) !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 修复下拉菜单在暗色主题下的显示问题 */
+select.holo-input option {
+    background-color: #000;
+    color: var(--holo-cyan);
+    font-family: 'Share Tech Mono', monospace;
+    padding: 10px;
+}

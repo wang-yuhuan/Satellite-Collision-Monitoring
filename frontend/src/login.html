@@ -1,0 +1,89 @@
+<div id="auth-overlay" class="auth-container">
+    
+    <div class="hud-layer">
+        <div class="center-ring">
+            <div class="sat-point p1"></div>
+            <div class="sat-point p2"></div>
+    </div>
+    </div>
+    
+    <canvas id="constellation-canvas"></canvas>
+    
+    <div class="auth-box">
+        
+        <div class="scan-effect"></div>
+        
+        <div id="view-login" class="auth-view">
+            <div class="auth-header">
+                <div class="auth-title glitch" data-text="SYSTEM LOGIN">SYSTEM LOGIN</div>
+                <div class="auth-subtitle">IDENTIFY YOURSELF</div>
+            </div>
+
+            <div class="input-group">
+                <label for="login-user">OPERATOR ID</label>
+                <div class="input-wrapper">
+                    <input type="text" id="login-user" class="holo-input" placeholder="USERNAME">
+                    <div class="input-highlight"></div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="login-pass">ACCESS CODE</label>
+                <div class="input-wrapper">
+                    <input type="password" id="login-pass" class="holo-input" placeholder="PASSWORD">
+                    <div class="input-highlight"></div>
+                </div>
+            </div>
+
+            <button id="btn-do-login" class="holo-btn auth-main-btn">
+                ESTABLISH LINK
+            </button>
+
+            <div class="auth-footer-action">
+                <span>NEW TERMINAL?</span>
+                <button id="btn-goto-register" class="frameless-btn">register</button>
+            </div>
+        </div>
+
+        <div id="view-register" class="auth-view hidden">
+            <div class="auth-header">
+                <div class="auth-title glitch" data-text="NEW REGISTRATION">NEW REGISTRATION</div>
+                <div class="auth-subtitle">CREATE NEW ID ENTITY</div>
+            </div>
+
+            <div class="input-group">
+                <label for="reg-user">NEW OPERATOR ID</label>
+                <div class="input-wrapper">
+                    <input type="text" id="reg-user" class="holo-input" placeholder="CHOOSE USERNAME">
+                    <div class="input-highlight"></div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="reg-pass">SET PASSWORD</label>
+                <div class="input-wrapper">
+                    <input type="password" id="reg-pass" class="holo-input" placeholder="PASSWORD">
+                    <div class="input-highlight"></div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="reg-pass-confirm">CONFIRM PASSWORD</label>
+                <div class="input-wrapper">
+                    <input type="password" id="reg-pass-confirm" class="holo-input" placeholder="REPEAT PASSWORD">
+                    <div class="input-highlight"></div>
+                </div>
+            </div>
+
+            <button id="btn-do-register" class="holo-btn btn-highlight auth-main-btn">
+                CONFIRM REGISTRATION
+            </button>
+
+            <div class="auth-footer-action">
+                <button id="btn-goto-login" class="frameless-btn">&lt;&lt; ABORT / RETURN TO LOGIN</button>
+            </div>
+        </div>
+
+        <div id="auth-msg" class="auth-status">AWAITING INPUT...</div>
+    </div>
+</div>

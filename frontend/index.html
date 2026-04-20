@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOLO-SYS</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;700&family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    
+    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="./src/login.css">
+
+</head>
+<body class="awaiting-login">
+
+    <div id="cesiumContainer"></div>
+
+    <div class="hud-header">
+        <div class="header-line"></div>
+        <div class="header-text">Satellite Collision Monitoring</div>
+        <div class="header-line"></div>
+    </div>
+
+    <div id="leftSidebar" class="sidebar-container">
+        <div id="trigger-left" class="side-trigger">
+            <div class="arrow-box">
+                <div class="arrow-icon"></div>
+            </div>
+        </div>
+        
+        <div class="geo-panel">
+            <div class="deco-corner top-right"></div>
+            <div class="deco-corner bottom-left"></div>
+
+            <div class="panel-title">OBJECT LAYERS</div>
+            
+            <div class="mb-15">
+                <button id="btn-update-data" class="holo-btn btn-highlight m-0">
+                    ↻ UPDATE DATA
+                </button>
+                <div id="status-display" class="font-mono text-10 text-dim mt-5 text-right">
+                    STATUS: IDLE
+                </div>
+            </div>
+
+            <div class="flex-col gap-10 mb-15">
+                <div class="flex-between">
+                    <label for="cb-layer-active" class="panel-label inline text-cyan text-14">ACTIVE SATELLITES</label>
+                    <input type="checkbox" id="cb-layer-active" checked class="check-cyan">
+                </div>
+
+                <div class="flex-between">
+                    <label for="cb-layer-stations" class="panel-label inline text-purple text-14">SPACE STATIONS</label>
+                    <input type="checkbox" id="cb-layer-stations" checked class="check-purple">
+                </div>
+
+                <div class="flex-between">
+                    <label for="cb-layer-debris" class="panel-label inline text-danger text-14">DEBRIS FRAGMENTS</label>
+                    <input type="checkbox" id="cb-layer-debris" checked class="check-danger">
+                </div>
+            </div>
+
+            <div class="holo-divider my-15"></div>
+
+            <div class="panel-title">ORBIT PARAMETERS</div>
+            
+            <div class="flex-between gap-10 mb-10">
+                <div class="w-full">
+                    <span class="panel-label">START TIME (UTC)</span>
+                    <input id="inp-start" class="holo-input m-0" type="text" placeholder="YYYY-MM-DD">
+                </div>
+
+                <div class="w-full">
+                    <span class="panel-label">END TIME (UTC)</span>
+                    <input id="inp-end" class="holo-input m-0" type="text" placeholder="YYYY-MM-DD">
+                </div>
+            </div>
+
+            <div class="mb-10">
+                <span class="panel-label">SATELLITE ID</span>
+                <input id="inp-sat-id" class="holo-input m-0" type="text" placeholder="NORAD ID (e.g. 49256)">
+            </div>
+
+            <button id="btn-grab-orbit" class="holo-btn mt-15">
+                GRAB ORBIT DATA
+            </button>
+
+            <div class="holo-divider my-15"></div>
+
+            <div class="panel-title">MANEUVER OPTION</div>
+            
+
+            <div class="mb-10">
+                <span class="panel-label">maneuver_start (UTC)</span>
+                <input id="inp-man-date" class="holo-input m-0" type="datetime-local" placeholder="YYYY-MM-DD HH:MM">
+            </div>
+
+            <div class="flex-between gap-10">
+                <div class="w-full">
+                    <span class="panel-label">DELTA V (km/s)</span>
+                    <input id="inp-dv-val" class="holo-input m-0" type="number" step="0.001" placeholder="0.1">
+                </div>
+                
+                <div class="w-full">
+                    <span class="panel-label">V SIGN (-1/1)</span>
+                    <input id="inp-v-sign" class="holo-input m-0" type="number" step="1" min="-1" max="1" placeholder="-1/1">
+                </div>
+
+            </div>
+
+            <button id="btn-maneuver-data" class="holo-btn btn-ghost mt-15">
+                MANEUVER DATA
+            </button>
+
+        </div>
+        
+    </div>
+
+    <div id="rightSidebar" class="sidebar-container">
+        <div id="trigger-right" class="side-trigger">
+            <div class="arrow-box">
+                <div class="arrow-icon"></div>
+            </div>
+        </div>
+
+        <div class="geo-panel">
+            <div class="deco-corner top-right"></div>
+            <div class="deco-corner bottom-left"></div>
+
+            <div class="panel-title">CONTROLS</div>
+
+            <span class="panel-label">DATA SOURCE</span>
+            <div class="flex-row gap-10">
+                <button id="btn-load-local" class="holo-btn">LOAD DATA</button>
+                <button id="btn-clear" class="holo-btn btn-danger">PURGE</button>
+            </div>
+
+            <span class="panel-label mt-20">TARGET DESIGNATION</span>
+            <input id="input-ids" class="holo-input" type="text" placeholder="ENTER NORAD ID...">
+
+            <div class="flex-between">
+                <span class="panel-label p-0 m-0 border-none">ORBIT DURATION</span>
+                <span id="val-duration" class="font-mono text-cyan text-12">24h</span>
+            </div>
+            <input id="inp-duration" type="range" min="0" max="10080" step="30" value="1440" class="holo-slider" aria-label="Orbit Duration">
+            
+            <button id="btn-load-online" class="holo-btn btn-ghost">
+                SHOW ORBIT
+            </button>
+
+            <div class="panel-title mt-40">TRACKING</div>
+            <div class="flex-row gap-10">
+                <button id="btn-track-selected" class="holo-btn">ENGAGE</button>
+                <button id="btn-stop-track" class="holo-btn btn-danger opacity-90">
+                    DISENGAGE
+                </button>
+            </div>
+
+            <div class="panel-title mt-30">LIVE TELEMETRY</div>
+
+            <div class="telemetry-grid">
+                <div class="tele-box">
+                    <div class="tele-label">VELOCITY</div>
+                    <div class="tele-value" id="val-velocity">--</div>
+                    <div class="tele-unit">km/s</div>
+                </div>
+                
+                <div class="tele-box">
+                    <div class="tele-label">ALTITUDE</div>
+                    <div class="tele-value" id="val-altitude">--</div>
+                    <div class="tele-unit">km</div>
+                </div>
+
+                <div class="tele-box">
+                    <div class="tele-label">LATITUDE</div>
+                    <div class="tele-value" id="val-lat">--</div>
+                    <div class="tele-unit">deg</div>
+                </div>
+
+                <div class="tele-box">
+                    <div class="tele-label">LONGITUDE</div>
+                    <div class="tele-value" id="val-lon">--</div>
+                    <div class="tele-unit">deg</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="bottomDrawer" class="bottom-drawer-container">
+        <div id="detail-overlay" class="detail-panel">
+            <div class="detail-header">
+                <div class="radar-icon"></div>
+                <span>CONJUNCTION ANALYSIS</span>
+                <span class="close-btn" onclick="document.getElementById('detail-overlay').classList.remove('active')">
+                        [X]
+                </span>
+            </div>
+            
+            <div class="chart-wrapper">
+                <canvas id="collisionChart"></canvas>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="holo-table">
+                    <thead>
+                        <tr>
+                            <th class="col-time">TIMESTAMP</th>
+                            <th>OBJ ID</th>
+                            <th>TGT ID</th>
+                            <th>MIN DIST (m)</th>
+                            <th>PROBABILITY</th>
+                        </tr>
+                    </thead>
+                    <tbody id="telemetry-body">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="socrates-table-wrapper" class="table-wrapper" style="display: none; margin-top: 15px; border-top: 1px dashed var(--holo-cyan); padding-top: 10px;">
+                <div class="panel-label mb-10" style="color: var(--holo-cyan); border: none; padding: 0;">SOCRATES PREDICTIONS</div>
+                <table class="holo-table">
+                    <thead>
+                        <tr>
+                            <th class="col-time">TIMESTAMP</th>
+                            <th>OBJ ID</th>
+                            <th>TGT ID</th>
+                            <th>MIN DIST (m)</th>
+                            <th>PROBABILITY</th>
+                        </tr>
+                    </thead>
+                    <tbody id="socrates-body">
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div id="trigger-bottom" class="drawer-handle">
+            <div class="handle-line"></div>
+        </div>
+
+        <div class="drawer-content">
+             <div>
+                 <div class="panel-label p-0 m-0 border-none">MISSION LOG</div>
+                 <div class="font-mono text-13 text-light mt-5">
+                     <span class="text-cyan">[SYSTEM]</span> WAITING FOR DATA STREAM...
+                 </div>
+             </div>
+             
+            <div class="flex-col align-end gap-5 text-right">
+                 <div class="panel-label p-0 text-right border-none">BUFFER STATUS</div>
+                 <div class="flex-row gap-10">
+                     <button id="btn-show-socrates" class="frameless-btn">
+                         [ OTHER RESULTS ]
+                     </button>
+                     <button id="btn-show-detail" class="frameless-btn">
+                         [ SHOW DETAILS ]
+                     </button>
+                 </div>
+             </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+
+</body>
+</html>
